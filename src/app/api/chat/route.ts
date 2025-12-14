@@ -5,6 +5,7 @@ import {
   createUIMessageStreamResponse,
   stepCountIs,
   streamText,
+  type UIMessage,
 } from 'ai'
 import { getOpenRouterModel, getModelId } from '@/ai/openrouter'
 import { tools } from '@/ai/tools'
@@ -58,14 +59,40 @@ export async function POST(req: Request) {
     console.log('🤔 User Query/Intent:', lastUserMessage.text)
   }
 
+  // Transform ChatUIMessage to UIMessage format
+  const transformedMessages: UIMessage[] = messages.map((msg) => ({
+    id: msg.id,
+    role: msg.role,
+    parts: msg.parts.map((part) => {
+      // Transform data parts from { type: 'data', content: [...] } to { type: 'data-communities', data: ... }
+      if (part.type === 'data' && 'content' in part) {
+        const content = part.content
+        // Check if it's a communities data part
+        if (Array.isArray(content) && content.length > 0 && content[0]?.type === 'communities') {
+          return {
+            type: 'data-communities' as const,
+            data: content,
+          }
+        }
+        // Fallback for other data types
+        return {
+          type: 'data-unknown' as const,
+          data: content,
+        }
+      }
+      // Pass through other parts as-is
+      return part as any
+    }),
+  }))
+
   return createUIMessageStreamResponse({
     stream: createUIMessageStream({
-      originalMessages: messages,
+      originalMessages: transformedMessages,
       execute: ({ writer }) => {
         const result = streamText({
           model,
           system: prompt,
-          messages: convertToModelMessages(messages),
+          messages: convertToModelMessages(transformedMessages),
           maxOutputTokens: 50000,
           stopWhen: stepCountIs(40), // Allow up to 40 steps for multiple searches
           tools: tools({ writer }),

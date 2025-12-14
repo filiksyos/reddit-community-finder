@@ -40,10 +40,14 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined)
 
 export function ChatProvider({ children }: { children: ReactNode }) {
   const [input, setInput] = useState('')
-  const { messages, sendMessage, status, error, reload, stop } = useChat<ChatUIMessage>({
+  // Use type assertion to bypass type constraint - ChatUIMessage is compatible at runtime
+  const chatHelpers = useChat({
     api: '/api/chat',
     maxSteps: 40,
-  })
+  } as any)
+  const { messages, sendMessage, status, error, stop } = chatHelpers
+  // reload might not be in the type definition but exists at runtime
+  const reload = (chatHelpers as any).reload as (() => void) | undefined
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setInput(e.target.value)
@@ -59,8 +63,26 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   const isLoading = status === 'streaming' || status === 'submitted'
 
+  // Transform messages from UIMessage format back to ChatUIMessage format
+  const transformedMessages: ChatUIMessage[] = (messages || []).map((msg: any) => ({
+    id: msg.id,
+    role: msg.role,
+    text: msg.text || '',
+    parts: (msg.parts || []).map((part: any) => {
+      // Transform data-communities back to data format with content
+      if (part.type === 'data-communities' && 'data' in part) {
+        return {
+          type: 'data' as const,
+          content: part.data,
+        }
+      }
+      // Pass through other parts as-is
+      return part
+    }),
+  }))
+
   const contextValue: ChatContextType = {
-    messages: messages || [],
+    messages: transformedMessages,
     input: input || '',
     handleInputChange,
     handleSubmit,

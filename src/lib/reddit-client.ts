@@ -13,7 +13,7 @@ export class RedditClient {
     this.clientSecret = clientSecret || process.env.REDDIT_CLIENT_SECRET
   }
 
-  private async getAccessToken(): Promise<string> {
+  private async getAccessToken(): Promise<string | null> {
     // Check if we have a valid token
     if (this.accessToken && Date.now() < this.tokenExpiry) {
       return this.accessToken

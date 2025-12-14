@@ -36,8 +36,8 @@ export const MessagePart = memo(function MessagePart({
       }
     }
     return null
-  } else if (part.type === 'text') {
-    return <Text part={part} />
+  } else if (part.type === 'text' && 'text' in part) {
+    return <Text part={part as { type: 'text'; text: string }} />
   } else if (typeof part.type === 'string' && part.type.startsWith('tool-') && 'toolCallId' in part) {
     // Handle AI SDK tool calls (tool-*)
     return <ToolUI part={part as unknown as ToolUIPart} />

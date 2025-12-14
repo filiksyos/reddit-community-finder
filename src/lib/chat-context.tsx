@@ -1,9 +1,29 @@
 'use client'
 
-import { createContext, useContext, ReactNode } from 'react'
-import { useChat, type Message } from '@ai-sdk/react'
+import { createContext, useContext, ReactNode, useState } from 'react'
+import { useChat } from '@ai-sdk/react'
 
-export type ChatUIMessage = Message
+export interface ChatUIMessage {
+  id: string
+  role: 'user' | 'assistant'
+  text: string
+  parts: Array<{
+    type: 'text'
+    text: string
+  } | {
+    type: 'data'
+    content: Array<{
+      type: 'communities'
+      communities: Array<any>
+    }>
+  } | {
+    type: string
+    toolName?: string
+    toolCallId?: string
+    result?: any
+    [key: string]: any
+  }>
+}
 
 interface ChatContextType {
   messages: ChatUIMessage[]
@@ -19,12 +39,38 @@ interface ChatContextType {
 const ChatContext = createContext<ChatContextType | undefined>(undefined)
 
 export function ChatProvider({ children }: { children: ReactNode }) {
-  const chat = useChat({
+  const [input, setInput] = useState('')
+  const { messages, sendMessage, status, error, reload, stop } = useChat<ChatUIMessage>({
     api: '/api/chat',
     maxSteps: 40,
   })
 
-  return <ChatContext.Provider value={chat}>{children}</ChatContext.Provider>
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setInput(e.target.value)
+  }
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (input.trim() && sendMessage) {
+      sendMessage({ text: input })
+      setInput('')
+    }
+  }
+
+  const isLoading = status === 'streaming' || status === 'submitted'
+
+  const contextValue: ChatContextType = {
+    messages: messages || [],
+    input: input || '',
+    handleInputChange,
+    handleSubmit,
+    isLoading,
+    error,
+    reload: reload || (() => {}),
+    stop: stop || (() => {}),
+  }
+
+  return <ChatContext.Provider value={contextValue}>{children}</ChatContext.Provider>
 }
 
 export function useChatContext() {

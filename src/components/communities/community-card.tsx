@@ -16,7 +16,7 @@ export function CommunityCard({ community }: CommunityCardProps) {
       href={community.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="block p-4 rounded-lg border border-border bg-card hover:bg-accent transition-colors group"
+      className="block p-4 rounded-lg border border-[color:hsl(var(--border))] bg-card hover:bg-accent transition-colors group"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">

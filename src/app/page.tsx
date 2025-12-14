@@ -7,7 +7,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm">
+      <header className="border-b border-[color:hsl(var(--border))] bg-card/50 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-3">
             <SearchIcon className="h-8 w-8 text-primary" />

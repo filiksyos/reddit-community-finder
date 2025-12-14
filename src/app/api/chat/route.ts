@@ -48,11 +48,14 @@ export async function POST(req: Request) {
 
   // Log user's query/intent
   const lastUserMessage = messages.filter((m) => m.role === 'user').pop()
-  const userQuery = lastUserMessage?.parts.find(
+  const userQuery = lastUserMessage?.parts?.find(
     (p) => p.type === 'text'
   ) as { type: 'text'; text: string } | undefined
   if (userQuery?.text) {
     console.log('🤔 User Query/Intent:', userQuery.text)
+  } else if (lastUserMessage?.text) {
+    // Fallback to text property if parts is not available
+    console.log('🤔 User Query/Intent:', lastUserMessage.text)
   }
 
   return createUIMessageStreamResponse({

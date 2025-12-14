@@ -68,17 +68,17 @@ export function ChatInterface() {
           className="flex select-none touch-none p-0.5 bg-muted transition-colors duration-150 ease-out hover:bg-muted/80 data-[orientation=vertical]:w-2.5 data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:h-2.5"
           orientation="vertical"
         >
-          <ScrollArea.Thumb className="flex-1 bg-border rounded-[10px] relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
+          <ScrollArea.Thumb className="flex-1 bg-[color:hsl(var(--border))] rounded-[10px] relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
         </ScrollArea.Scrollbar>
       </ScrollArea.Root>
 
       {/* Input Area */}
-      <div className="border-t border-border bg-card">
+      <div className="border-t border-[color:hsl(var(--border))] bg-card">
         <div className="container mx-auto px-4 py-4 max-w-4xl">
           <form onSubmit={handleSubmit} className="flex gap-2">
             <input
               type="text"
-              value={input}
+              value={input || ''}
               onChange={handleInputChange}
               placeholder="Ask me to find Reddit communities..."
               disabled={isLoading}
@@ -86,7 +86,7 @@ export function ChatInterface() {
             />
             <button
               type="submit"
-              disabled={isLoading || !input.trim()}
+              disabled={isLoading || !(input || '').trim()}
               className="px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
             >
               {isLoading ? (

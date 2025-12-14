@@ -29,18 +29,30 @@ export const presentCommunities = ({ writer }: Params) =>
     }),
     execute: async ({ communities }, { toolCallId: _toolCallId }) => {
       console.log(`📊 Presenting ${communities.length} communities`)
+      console.log(`📦 Community names:`, communities.map(c => c.display_name).join(', '))
 
-      // Write the communities data to the UI stream
-      writer.write({
-        type: 'data',
-        content: [
-          {
-            type: 'communities',
-            communities: communities as RedditCommunity[],
-          },
-        ],
-      })
+      // Don't write data part - ToolUI will render from the output
+      // This prevents double rendering
 
-      return `✅ Successfully presented ${communities.length} Reddit communities to the user.`
+      // Return object with communities for ToolUI to render
+      // Also return formatted text for AI context
+      const communityList = communities.map((community, index) => {
+        return `${index + 1}. **${community.display_name}** - ${community.title}
+   ${community.public_description || community.description}
+   👥 ${community.subscribers.toLocaleString()} members | 🔗 ${community.url}`
+      }).join('\n\n')
+
+      // Return object with communities for ToolUI, and formatted text
+      return {
+        communities: communities as RedditCommunity[],
+        message: `✅ Successfully presented ${communities.length} Reddit communities to the user.
+
+## Communities Found
+
+${communityList}
+
+---
+*💡 These communities are displayed above for easy reference*`
+      }
     },
   })

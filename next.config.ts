@@ -8,6 +8,17 @@ const nextConfig: NextConfig = {
     })
     return config
   },
+  // Turbopack configuration for markdown files
+  experimental: {
+    turbo: {
+      rules: {
+        '*.md': {
+          loaders: ['raw-loader'],
+          as: '*.js',
+        },
+      },
+    },
+  },
 }
 
 export default nextConfig
